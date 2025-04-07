@@ -1,0 +1,35 @@
+- name: Provision Dockerized MySQL Server
+  hosts: all
+  become: true
+  tasks:
+    - name: Install Docker
+      apt:
+        name: docker.io
+        state: present
+        update_cache: true
+
+    - name: Start Docker service
+      service:
+        name: docker
+        state: started
+        enabled: true
+
+    - name: Create MySQL data volume
+      docker_volume:
+        name: mysql_data
+
+    - name: Run MySQL container
+      docker_container:
+        name: mysql
+        image: mysql:8.0
+        state: started
+        restart_policy: always
+        env:
+          MYSQL_ROOT_PASSWORD: "secret"
+          MYSQL_DATABASE: "streaming"
+          MYSQL_USER: "streaming_user"
+          MYSQL_PASSWORD: "streaming_pass"
+        published_ports:
+          - "3306:3306"
+        volumes:
+          - mysql_data:/var/lib/mysql

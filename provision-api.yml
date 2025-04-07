@@ -1,0 +1,28 @@
+- name: Provision API/Chat
+  hosts: all
+  become: true
+  tasks:
+    - name: Install Docker
+      apt:
+        name: docker.io
+        state: present
+        update_cache: true
+
+    - name: Pull chat server image
+      docker_image:
+        name: ja2g/myapitest:2.0
+        source: pull
+
+    - name: Run Chat server container
+      docker_container:
+        name: chat-server
+        image: ja2g/myapitest:2.0
+        state: started
+        restart_policy: always
+        published_ports:
+          - "3000:3000"
+        env:
+          DB_HOST: "192.168.1.15"
+          DB_USER: "root"
+          DB_PASS: "secret"
+          DB_NAME: "streaming"
