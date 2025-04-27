@@ -1,28 +1,58 @@
-- name: Provision API/Chat
+- name: Provision API / Chat in development mode
   hosts: all
   become: true
+  vars:
+    node_version: "18.x"   
   tasks:
-    - name: Install Docker
-      apt:
-        name: docker.io
+    - name: Add NodeSource apt key
+      ansible.builtin.apt_key:
+        url: https://deb.nodesource.com/gpgkey/nodesource.gpg.key
         state: present
-        update_cache: true
 
-    - name: Pull chat server image
-      docker_image:
-        name: ja2g/myapitest:2.0
-        source: pull
+    - name: Add NodeSource repo
+      ansible.builtin.apt_repository:
+        repo: "deb https://deb.nodesource.com/node_{{ node_version }} jammy main"
+        state: present
 
-    - name: Run Chat server container
-      docker_container:
-        name: chat-server
-        image: ja2g/myapitest:2.0
+    - name: Install Node.js & build tools
+      ansible.builtin.apt:
+        name:
+          - nodejs
+          - build-essential
+        state: present
+        update_cache: yes
+
+    - name: Ensure /home/vagrant/api exists
+      file:
+        path: /home/vagrant/api
+        state: directory
+        owner: vagrant
+
+    - name: Install npm dependencies
+      ansible.builtin.command:
+        cmd: npm install
+        chdir: /home/vagrant/api
+      become_user: vagrant
+
+    - name: Install nodemon globally for auto‐reload
+      ansible.builtin.npm:
+        name: nodemon
+        global: yes
+
+    - name: Copy api-dev systemd unit
+      ansible.builtin.template:
+        src: templates/api-dev.service.j2
+        dest: /etc/systemd/system/api-dev.service
+        owner: root
+        group: root
+        mode: 0644
+
+    - name: Reload systemd daemons
+      ansible.builtin.systemd:
+        daemon_reload: true
+
+    - name: Enable & start api-dev service
+      ansible.builtin.systemd:
+        name: api-dev
+        enabled: yes
         state: started
-        restart_policy: always
-        published_ports:
-          - "3000:3000"
-        env:
-          DB_HOST: "192.168.1.15"
-          DB_USER: "root"
-          DB_PASS: "secret"
-          DB_NAME: "streaming"

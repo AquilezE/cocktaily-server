@@ -16,6 +16,16 @@
         group: root
         mode: 0644
 
+    - name: Wait for nginx.conf to exist
+      ansible.builtin.stat:
+        path: /home/vagrant/nginx.conf
+      register: nginx_conf
+
+    - name: Fail if config is missing
+      ansible.builtin.fail:
+        msg: "nginx.conf not found!"
+      when: not nginx_conf.stat.exists
+
     - name: Run Nginx RTMP container with custom config
       docker_container:
         name: nginx-rtmp
@@ -27,4 +37,4 @@
           - "8080:80"
         volumes:
           - /tmp/hls:/tmp/hls
-          - /home/vagrant/nginx.conf:/etc/nginx/nginx.conf:ro
+          - /home/vagrant/nginx.conf:/etc/nginx/nginx.conf

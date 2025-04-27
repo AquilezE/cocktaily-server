@@ -17,6 +17,9 @@ Vagrant.configure("2") do |config|
   config.vm.define "api" do |api|
     api.vm.hostname = "apiStream"
     api.vm.network "public_network", ip: "192.168.1.14"
+
+        api.vm.synced_folder "./api", "/home/vagrant/api", type: "rsync"
+
     api.vm.provision "ansible_local" do |ansible|
       ansible.playbook = "provision-api.yml"
     end

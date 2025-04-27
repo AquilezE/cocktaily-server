@@ -1,0 +1,24 @@
+{
+  "development": {
+    "username": "streaming_user",
+    "password": "streaming_pass",
+    "database": "streaming",
+    "host": "192.168.1.15",
+    "dialect": "mysql"
+  },
+  "test": {
+    "username": "root",
+    "password": null,
+    "database": "database_test",
+    "host": "127.0.0.1",
+    "dialect": "mysql"
+  },
+  "production": {
+    "username": "root",
+    "password": null,
+    "database": "database_production",
+    "host": "",
+    "dialect": "mysql"
+  }
+}
+
