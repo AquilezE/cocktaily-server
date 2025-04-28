@@ -2,29 +2,24 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('Chats', {
+    await queryInterface.createTable('Comments', {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      nombre: {
-        type: Sequelize.STRING
+      user_id: {
+        type: Sequelize.INTEGER
       },
-      idTipo: {
-        type: Sequelize.INTEGER,
-        allowNull: true
+      cocktail_id: {
+        type: Sequelize.INTEGER
       },
-      tiempoCreacion: {
+      text: {
+        type: Sequelize.TEXT
+      },
+      created_at: {
         type: Sequelize.DATE
-      },
-      idUsuarioCreacion: {
-        type: Sequelize.INTEGER,
-        allowNull: false,
-        references: {model: 'Usuarios', key: 'idUsuario'},
-        onUpdate: 'CASCADE',
-        onDelete: 'CASCADE'
       },
       createdAt: {
         allowNull: false,
@@ -37,6 +32,6 @@ module.exports = {
     });
   },
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('Chats');
+    await queryInterface.dropTable('Comments');
   }
 };

@@ -2,35 +2,20 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('Usuarios', {
+    await queryInterface.createTable('CocktailIngredients', {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      nombre: {
-        type: Sequelize.STRING
+      cocktail_id: {
+        type: Sequelize.INTEGER
       },
-      email: {
-        type: Sequelize.STRING
+      ingredient_id: {
+        type: Sequelize.INTEGER
       },
-      fechaNacimiento: {
-        type: Sequelize.DATE
-      },
-      username: {
-        type: Sequelize.STRING
-      },
-      password: {
-        type: Sequelize.STRING
-      },
-      fotoPerfil: {
-        type: Sequelize.STRING
-      },
-      tiempoCreacion: {
-        type: Sequelize.DATE
-      },
-      telefono: {
+      quantity: {
         type: Sequelize.STRING
       },
       createdAt: {
@@ -44,6 +29,6 @@ module.exports = {
     });
   },
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('Usuarios');
+    await queryInterface.dropTable('CocktailIngredients');
   }
 };

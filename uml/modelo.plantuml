@@ -1,0 +1,92 @@
+@startuml
+hide circle
+skinparam linetype ortho
+
+entity USERS {
+  * id : INT <<PK>>
+  --
+  username            : VARCHAR
+  email               : VARCHAR
+  password_hash       : VARCHAR
+  profile_picture_url : VARCHAR
+  role                : VARCHAR    ' normal | moderator
+  created_at          : DATETIME
+  updated_at          : DATETIME
+}
+
+entity COCKTAILS {
+  * id             : INT <<PK>>
+  --
+  name            : VARCHAR
+  description     : TEXT
+  video_url       : VARCHAR
+  status          : VARCHAR    ' pending | approved | rejected
+  created_at      : DATETIME
+  updated_at      : DATETIME
+  user_id         : INT <<FK>>  
+  moderated_by    : INT <<FK>>  ' refiere a USERS.id
+  moderated_at    : DATETIME
+}
+
+entity INGREDIENTS {
+  * id   : INT <<PK>>
+  --
+  name : VARCHAR
+}
+
+entity COCKTAIL_INGREDIENTS {
+  * cocktail_id   : INT <<FK>>
+  * ingredient_id : INT <<FK>>
+  --
+}
+
+entity LIKES {
+  * user_id     : INT <<FK>>
+  * cocktail_id : INT <<FK>>
+  --
+  created_at   : DATETIME
+}
+
+entity COMMENTS {
+  * id         : INT <<PK>>
+  --
+  user_id     : INT <<FK>>
+  cocktail_id : INT <<FK>>
+  text        : TEXT
+  created_at  : DATETIME
+}
+
+entity LIVE_SESSIONS {
+  * id         : INT <<PK>>
+  --
+  user_id     : INT <<FK>>
+  title       : VARCHAR
+  stream_key  : VARCHAR
+  url         : VARCHAR
+  started_at  : DATETIME
+  ended_at    : DATETIME
+}
+
+entity CHAT_MESSAGES {
+  * id         : INT <<PK>>
+  --
+  session_id  : INT <<FK>>  ' refiere a LIVE_SESSIONS.id
+  user_id     : INT <<FK>>
+  message     : TEXT
+  created_at  : DATETIME
+}
+
+USERS ||--o{ COCKTAILS               : "author of"
+USERS ||--o{ COCKTAILS : "moderates"  : moderated_by
+USERS ||--o{ COMMENTS                : "writes"
+USERS ||--o{ LIKES                   : "likes"
+USERS ||--o{ LIVE_SESSIONS           : "hosts"
+USERS ||--o{ CHAT_MESSAGES           : "sends"
+
+COCKTAILS ||--o{ COCKTAIL_INGREDIENTS : "contains"
+INGREDIENTS ||--o{ COCKTAIL_INGREDIENTS : "used in"
+COCKTAILS ||--o{ COMMENTS             : "has"
+COCKTAILS ||--o{ LIKES                : "receives"
+LIVE_SESSIONS ||--o{ CHAT_MESSAGES     : "has"
+
+@enduml

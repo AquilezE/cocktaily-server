@@ -1,21 +1,19 @@
-// app.js
 const express = require('express');
 const cors = require('cors');
 const http = require('http');
 const app = express();
 
 const { Sequelize } = require('sequelize');
-const models = require('./models'); 
+const models = require('./models');
+const routes = require('./routes'); // <<< THIS
 
-const server = http.createServer(app)
-const { Server} = require("socket.io");
-
+const server = http.createServer(app);
+const { Server } = require("socket.io");
 const io = new Server(server);
-
-
 
 app.use(express.json());
 app.use(cors());
+app.use('/api', routes);   // <<< MOUNT the routes here
 
 models.sequelize.authenticate().then(() => console.log('BD conectada')).catch(err => console.error('pedos con bd: ', err))
 

@@ -8,6 +8,7 @@ module.exports = {
 
       const hashedPassword = await bcrypt.hash(password, 10);
 
+      
       const newUser = await Usuario.create({
         username,
         email,
@@ -17,7 +18,7 @@ module.exports = {
       });
 
       res.status(201).json({
-        idUsuario: newUser.idUsuario,
+        idUsuario: newUser.id,
         username: newUser.username,
         email: newUser.email
       });
@@ -33,18 +34,18 @@ module.exports = {
       const user = await Usuario.findOne({ where: { email } });
 
       if (!user) {
-        return res.status(404).json({ error: 'User not found' });
+        return res.status(404).json({ error: 'Usuario no encontrado' });
       }
 
       const validPassword = await bcrypt.compare(password, user.password);
 
       if (!validPassword) {
-        return res.status(401).json({ error: 'Invalid password' });
+        return res.status(401).json({ error: 'Nel' });
       }
 
-      // If you want to return a token later, you can generate JWT here
+      //JWT luego pa
       res.json({
-        message: 'Login successful',
+        message: 'Login hecho',
         user: {
           idUsuario: user.idUsuario,
           username: user.username,
