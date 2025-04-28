@@ -17,7 +17,7 @@
         mode: 0644
 
     - name: Wait for nginx.conf to exist
-      ansible.builtin.stat:
+      ansible.buillotin.stat:
         path: /home/vagrant/nginx.conf
       register: nginx_conf
 
