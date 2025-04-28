@@ -3,7 +3,7 @@
     "username": "streaming_user",
     "password": "streaming_pass",
     "database": "streaming",
-    "host": "10.116.28.15",
+    "host": "192.168.1.15",
     "dialect": "mysql"
   },
   "test": {
