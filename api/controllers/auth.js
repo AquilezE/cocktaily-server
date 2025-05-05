@@ -1,59 +1,54 @@
 const bcrypt = require('bcrypt');
-const { Usuario } = require('../models');
+const { User } = require('../models');
+const { GenerarToken, TiempoRestanteToken  } = require('../services/jwtoken.service');
 
-module.exports = {
-  async signup(req, res, next) {
-    try {
-      const { username, email, password, telefono, fechaNacimiento } = req.body;
 
-      const hashedPassword = await bcrypt.hash(password, 10);
 
-      
-      const newUser = await Usuario.create({
-        username,
-        email,
-        password: hashedPassword,
-        telefono,
-        fechaNacimiento
-      });
+let self = {};
 
-      res.status(201).json({
-        idUsuario: newUser.id,
-        username: newUser.username,
-        email: newUser.email
-      });
-    } catch (err) {
-      next(err);
+self.login = async function (req, res) {
+  const { email, password } = req.body;
+  
+  try{
+    let data = await User.findOne({ 
+      where: { email }, 
+      raw: true 
+    });
+   
+    if (!data) {
+      return res.status(401).json({ message: 'Usuario o contraseña incorrectas'});
     }
-  },
 
-  async login(req, res, next) {
-    try {
-      const { email, password } = req.body;
-
-      const user = await Usuario.findOne({ where: { email } });
-
-      if (!user) {
-        return res.status(404).json({ error: 'Usuario no encontrado' });
-      }
-
-      const validPassword = await bcrypt.compare(password, user.password);
-
-      if (!validPassword) {
-        return res.status(401).json({ error: 'Nel' });
-      }
-
-      //JWT luego pa
-      res.json({
-        message: 'Login hecho',
-        user: {
-          idUsuario: user.idUsuario,
-          username: user.username,
-          email: user.email
-        }
-      });
-    } catch (err) {
-      next(err);
+    const passwordMatch = await bcrypt.compare(password, data.password_hash);
+    if (!passwordMatch) {
+      return res.status(401).json({ message: 'Usuario o contraseña incorrectas'});
     }
+
+    let token = GenerarToken(data.email, data.username, data.role);
+
+    return res.status(200).json({
+      email: data.email,
+      username: data.username,
+      role: data.role,
+      jwt: token,
+    });
+  }catch (error) {
+    return res.status(400).json(
+      { message: 'Error al iniciar sesión', error: error.message }
+    );
   }
-};
+}
+
+
+self.tiempoRestanteToken = async function (req, res) {
+  const tiempoRestanteToken = await TiempoRestanteToken(req);
+  if (!tiempoRestanteToken) {
+    return res.status(401).json({ message: 'Token no valido'});
+  }
+  return res.status(200).json({
+    minutos: tiempoRestanteToken.minutes,
+    segundos: tiempoRestanteToken.seconds
+  });
+}
+
+module.exports = self;
