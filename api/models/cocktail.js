@@ -37,11 +37,10 @@ module.exports = (sequelize, DataTypes) => {
   }
   Cocktail.init({
     name: DataTypes.STRING,
-    description: DataTypes.TEXT,
+    creation_steps: DataTypes.TEXT,
     video_url: DataTypes.STRING,
+    image_url: DataTypes.STRING,
     status: DataTypes.STRING,
-    created_at: DataTypes.DATE,
-    updated_at: DataTypes.DATE,
     user_id: DataTypes.INTEGER,
     moderated_by: DataTypes.INTEGER,
     moderated_at: DataTypes.DATE
