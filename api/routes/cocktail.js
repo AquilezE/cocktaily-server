@@ -3,5 +3,6 @@ const router = express.Router();
 const controller = require("../controllers/cocktail");
 
 router.post("/", controller.createRecipe);
+router.get("/:id", controller.getRecipeById);
 
 module.exports = router;
