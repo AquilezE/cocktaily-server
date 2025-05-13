@@ -8,10 +8,13 @@ exports.createRecipe = async (req, res) => {
     video_url,
     image_url,
     user_id,
+    preparation_time,
+    is_non_alcoholic,
+    alcohol_type,
     ingredients
   } = req.body;
 
-  if (!name || !creation_steps || !video_url || !image_url || !user_id || !ingredients || !Array.isArray(ingredients)) {
+  if (!name || !creation_steps || !video_url || !image_url || !user_id || !preparation_time || typeof is_non_alcoholic === 'undefined' || !Array.isArray(ingredients)) {
     return res.status(400).json({ mensaje: "Por favor llene todos los campos" });
   }
 
@@ -21,10 +24,13 @@ exports.createRecipe = async (req, res) => {
       creation_steps,
       video_url,
       image_url,
+      preparation_time,
+      is_non_alcoholic,
+      alcohol_type: is_non_alcoholic ? null : alcohol_type,
       user_id,
       status: "pendiente de revisión",
-      created_at: new Date(),
-      updated_at: new Date()
+      createdAt: new Date(),
+      updatedAt: new Date()
     });
 
     for (const ing of ingredients) {
@@ -41,7 +47,6 @@ exports.createRecipe = async (req, res) => {
 
   } catch (error) {
     console.error("Error al crear la receta:", error);
-
     return res.status(500).json({
       mensaje: "No pudimos establecer conexión con el servidor. Por favor intente más tarde."
     });
@@ -49,9 +54,7 @@ exports.createRecipe = async (req, res) => {
 };
 
 exports.getRecipeById = async (req, res) => {
-  const {
-     id
-  } = req.params;
+  const { id } = req.params;
 
   try {
     const recipe = await Cocktail.findOne({
@@ -98,6 +101,9 @@ exports.getRecipeById = async (req, res) => {
       id: recipe.id,
       name: recipe.name,
       creation_steps: recipe.creation_steps,
+      preparation_time: recipe.preparation_time,
+      is_non_alcoholic: recipe.is_non_alcoholic,
+      alcohol_type: recipe.alcohol_type,
       video_url: recipe.video_url,
       image_url: recipe.image_url,
       created_at: recipe.created_at,
@@ -110,5 +116,32 @@ exports.getRecipeById = async (req, res) => {
   } catch (error) {
     console.error('Error al recuperar la receta:', error);
     res.status(500).json({ mensaje: 'No fue posible conectarse al servidor. Por favor intente más tarde.' });
+  }
+};
+
+exports.deleteRecipe = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const recipe = await db.Cocktail.findByPk(id);
+
+    if (!recipe) {
+      return res.status(404).json({ mensaje: "La receta no existe" });
+    }
+
+    if (recipe.status !== "aceptada") {
+      return res.status(400).json({ mensaje: "Solo se pueden eliminar recetas aceptadas" });
+    }
+
+    recipe.status = "eliminada";
+    await recipe.save();
+
+    return res.status(200).json({ mensaje: "La receta ha sido eliminada correctamente" });
+
+  } catch (error) {
+    console.error("Error al eliminar la receta:", error);
+    return res.status(500).json({
+      mensaje: "No pudimos establecer conexión con el servidor. Por favor intente más tarde."
+    });
   }
 };

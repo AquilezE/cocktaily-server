@@ -2,13 +2,9 @@
 const {
   Model
 } = require('sequelize');
+
 module.exports = (sequelize, DataTypes) => {
   class Cocktail extends Model {
-    /**
-     * Helper method for defining associations.
-     * This method is not a part of Sequelize lifecycle.
-     * The `models/index` file will call this method automatically.
-     */
     static associate(models) {
       this.belongsTo(models.User, {
         foreignKey: 'user_id',
@@ -32,14 +28,17 @@ module.exports = (sequelize, DataTypes) => {
         otherKey: 'ingredient_id',
         as: 'ingredients',
       });
-
     }
   }
+
   Cocktail.init({
     name: DataTypes.STRING,
     creation_steps: DataTypes.TEXT,
+    preparation_time: DataTypes.INTEGER,
     video_url: DataTypes.STRING,
     image_url: DataTypes.STRING,
+    is_non_alcoholic: DataTypes.BOOLEAN,
+    alcohol_type: DataTypes.STRING,
     status: DataTypes.STRING,
     user_id: DataTypes.INTEGER,
     moderated_by: DataTypes.INTEGER,
@@ -48,5 +47,6 @@ module.exports = (sequelize, DataTypes) => {
     sequelize,
     modelName: 'Cocktail',
   });
+
   return Cocktail;
 };
