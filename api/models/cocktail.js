@@ -36,7 +36,10 @@ module.exports = (sequelize, DataTypes) => {
     creation_steps: DataTypes.TEXT,
     preparation_time: DataTypes.INTEGER,
     video_url: DataTypes.STRING,
-    image_url: DataTypes.STRING,
+    image_url: {
+      type: DataTypes.TEXT('long'),
+      allowNull: false
+    },
     is_non_alcoholic: DataTypes.BOOLEAN,
     alcohol_type: DataTypes.STRING,
     status: DataTypes.STRING,

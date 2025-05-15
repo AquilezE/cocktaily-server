@@ -34,13 +34,22 @@ exports.createRecipe = async (req, res) => {
     });
 
     for (const ing of ingredients) {
-      await CocktailIngredient.create({
+      const { name, quantity } = ing;
+      if (!name || !quantity) {
+        console.warn('Ingrediente inválido:', ing);
+        continue;
+      }
+      let ingredient = await db.Ingredient.findOne({ where: { name } });
+      if (!ingredient) {
+        ingredient = await db.Ingredient.create({ name });
+      }
+      await db.CocktailIngredient.create({
         cocktail_id: newRecipe.id,
-        ingredient_id: ing.ingredient_id,
-        quantity: ing.quantity
+        ingredient_id: ingredient.id,
+        quantity
       });
     }
-
+    
     return res.status(201).json({
       mensaje: "La receta ha sido enviada a revisión por un moderador. Recibirás una notificación con una respuesta tan pronto como sea posible."
     });

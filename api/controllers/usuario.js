@@ -52,5 +52,17 @@ module.exports = {
     } catch (err) {
       next(err);
     }
+  },
+
+  async getByUsername(req, res, next) {
+    try {
+      const usuario = await User.findOne({
+        where: { username: req.params.username }
+      });
+      if (!usuario) return res.status(404).json({ error: 'Not found' });
+      res.json(usuario);
+    } catch (err) {
+      next(err);
+    }
   }
 };
