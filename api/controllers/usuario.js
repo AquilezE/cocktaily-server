@@ -1,3 +1,4 @@
+const bcrypt = require('bcrypt');
 const { User } = require('../models');
 
 module.exports = {
@@ -22,8 +23,25 @@ module.exports = {
 
   async create(req, res, next) {
     try {
-      const newUser = await User.create(req.body);
-      res.status(201).json(newUser);
+      const { username, email, password, profile_picture_path, bio, role } = req.body;
+
+      if (!password) {
+        return res.status(400).json({ error: 'Password es requerido' });
+      }
+      const password_hash = await bcrypt.hash(password, 10);
+      
+      const newUser = await User.create({
+        username,
+        email,
+        password_hash,
+        profile_picture_path,
+        bio,
+        role
+      });
+      const userResponse = { ...newUser.toJSON() };
+      delete userResponse.password_hash;
+
+      res.status(201).json(userResponse);
     } catch (err) {
       next(err);
     }
