@@ -25,7 +25,19 @@ module.exports = function attachSocket(server) {
           console.warn(`LiveSession no encontrada para key=${channel}`);
           return;
         }
+        var payload;
 
+
+        if (session.ended_at) {
+
+          console.warn(`LiveSession ya finalizada para key=${channel}`);
+          payload = {
+            isActive: false,
+          };
+
+          io.to(channel).emit(`message:${channel}`, payload);
+          return;
+        }
         const chat = await ChatMessage.create({
           session_id: session.id,
           user_id:      user.id,      
@@ -33,11 +45,12 @@ module.exports = function attachSocket(server) {
           created_at:   new Date(),
         });
 
-        const payload = {
+        payload = {
           id:        chat.id,
           user:      { id: user.id, username: user.username },
           text:      chat.message,
           timestamp: chat.created_at,
+          isActive: true,
         };
 
         io.to(channel).emit(`message:${channel}`, payload);

@@ -6,7 +6,7 @@ module.exports = {
       type: Sequelize.DataTypes.TEXT('long'),
       allowNull: false,
     });
-
+/*
     await queryInterface.addColumn('Cocktails', 'createdAt', {
       type: Sequelize.DATE,
       allowNull: false,
@@ -18,6 +18,7 @@ module.exports = {
       allowNull: false,
       defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
     });
+    */
   },
 
   down: async (queryInterface, Sequelize) => {
