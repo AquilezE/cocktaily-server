@@ -1,5 +1,7 @@
 // src/server.js
+const http = require('http');
 const app = require('./app');
+const attachSocket = require('./socket'); 
 const { sequelize } = require('./models');
 
 
@@ -13,8 +15,12 @@ const PORT = process.env.PORT || 3000;
     await sequelize.sync({ alter: true });
     console.log('✅ Tables synced');
 
-    app.listen(PORT, () =>
-        console.log(`listening on port ${PORT}`)
+    const server = http.createServer(app);
+
+    attachSocket(server);
+
+    server.listen(PORT, () =>
+      console.log(`✅ API + Socket.IO listening on port ${PORT}`)
     );
   } catch (err) {
     console.error('❌ Startup error:', err);

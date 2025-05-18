@@ -7,6 +7,6 @@ router.use('/v1/health', require('./serverHealth'));
 router.use('/v1/usuarios', require('./user'));
 //router.use('/v1/chats', require('./chat'));
 router.use('/v1/cocktails', require('./cocktail'));
-
+router.use('/v1/livesession', require('./livesession'));
 
 module.exports = router;

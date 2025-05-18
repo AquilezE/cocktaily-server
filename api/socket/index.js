@@ -1,48 +1,56 @@
-const {Server} = require('socket.io');
-const {
-    Chat, 
-    ParticianteChat,
-    Mensaje, 
-    Usuario
-} = require('../models');
+const db = require("../models");
+const LiveSession = db.LiveSession;
+const ChatMessage = db.ChatMessage;
+const socketIo = require('socket.io');
 
-module.exports = (server) => {
-    const io = new Server(server, {
-        cors: {origin: '*'}
+module.exports = function attachSocket(server) {
+  const io = socketIo(server, {
+    cors: { origin: '*' },
+  });
+
+  io.on('connection', (socket) => {
+    console.log('Cliente conectado:', socket.id);
+
+    socket.on('join', (streamKey) => {
+      socket.join(streamKey);
+      console.log(`Socket ${socket.id} se unió a ${streamKey}`);
     });
 
-io.on('connection', socket => {
-    console.log(`Socket Connected: ${socket.id}`);
+    socket.on('message', async ({ channel, text, user }) => {
+      try {
+        const session = await LiveSession.findOne({
+          where: { stream_key: channel }
+        });
+        if (!session) {
+          console.warn(`LiveSession no encontrada para key=${channel}`);
+          return;
+        }
 
-    socket.on('join_chat', ({ chatId }) => {
-        socket.join(`chat_${chatId}`);
-        console.log(`<-- ${socket.id} left room chat_${chatId}`);
-    });
-
-    socket.on('send_message', async ({chatId, userId, contenido}) => {
-        const part = await ParticianteChat.findOne({
-            where: { idChat: chatId, idUsuario: userId}
+        const chat = await ChatMessage.create({
+          session_id: session.id,
+          user_id:      user.id,      
+          message:      text,
+          created_at:   new Date(),
         });
 
-    if (!part) return socket.emit('error', 'No participa en este chat');
+        const payload = {
+          id:        chat.id,
+          user:      { id: user.id, username: user.username },
+          text:      chat.message,
+          timestamp: chat.created_at,
+        };
 
-    const msg = await Mensaje.create({
-        idChat: chatId,
-        idParticipante: part.idParticipante, contenido
-    });
+        io.to(channel).emit(`message:${channel}`, payload);
 
-    const payload = {
-        idMensaje: msg.idMensaje, chatId,
-        contenido: msg.contenido,
-        senderId: userId
-    };
-    io.to(`chat_${chatId}`).emit('new_message', payload);
-    
+      } catch (err) {
+        console.error('Error procesando mensaje:', err);
+      }
     });
 
     socket.on('disconnect', () => {
-        console.log(`Socket disconnected: ${socket.id}`);
+      console.log('Cliente desconectado:', socket.id);
     });
-});
-    return io;
+  });
+
+  return io;
 };
