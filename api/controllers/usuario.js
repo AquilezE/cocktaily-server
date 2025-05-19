@@ -50,7 +50,7 @@ module.exports = {
   async update(req, res, next) {
     try {
       const [updated] = await User.update(req.body, {
-        where: { idUsuario: req.params.id }
+        where: { id: req.params.id }
       });
       if (!updated) return res.status(404).json({ error: 'Not found' });
       const usuario = await User.findByPk(req.params.id);
