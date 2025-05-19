@@ -27,7 +27,7 @@ Vagrant.configure("2") do |config|
 
   config.vm.define "mysql" do |mysql|
     mysql.vm.hostname = "mysqlStream"
-    mysql.vm.network "public_network", ip: "192.168.100.15"
+    mysql.vm.network "public_network", ip: "10.160.172.180"
     mysql.vm.provision "ansible_local" do |ansible|
       ansible.playbook = "provision-mysql.yml"
     end

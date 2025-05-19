@@ -28,7 +28,7 @@ exports.createRecipe = async (req, res) => {
       is_non_alcoholic,
       alcohol_type: is_non_alcoholic ? null : alcohol_type,
       user_id,
-      status: "pendiente de revisión",
+      status: "pendiente de revision",
       createdAt: new Date(),
       updatedAt: new Date()
     });
@@ -36,7 +36,7 @@ exports.createRecipe = async (req, res) => {
     for (const ing of ingredients) {
       const { name, quantity } = ing;
       if (!name || !quantity) {
-        console.warn('Ingrediente inválido:', ing);
+        console.warn('Ingrediente invalido:', ing);
         continue;
       }
       let ingredient = await db.Ingredient.findOne({ where: { name } });
@@ -195,4 +195,135 @@ exports.deleteRecipe = async (req, res) => {
       mensaje: "No pudimos establecer conexión con el servidor. Por favor intente más tarde."
     });
   }
+
 };
+
+exports.getAllPendingCocktails = async (req, res) => {
+    try {
+    const cocktails = await db.Cocktail.findAll({
+      where: { status: 'pendiente de revision' },
+      include: [
+        {
+          model: db.Ingredient,
+          as: 'ingredients',
+          through: { attributes: ['quantity'] }
+        },
+        {
+          model: db.Like,
+          as: 'likes'
+        }
+      ],
+      order: [['createdAt', 'DESC']]
+    });
+
+    const formatted = cocktails.map(cocktail => ({
+      id: cocktail.id,
+      name: cocktail.name,
+      creation_steps: cocktail.creation_steps,
+      preparation_time: cocktail.preparation_time,
+      is_non_alcoholic: cocktail.is_non_alcoholic,
+      alcohol_type: cocktail.alcohol_type,
+      video_url: cocktail.video_url,
+      image_url: cocktail.image_url,
+      created_at: cocktail.created_at,
+      updated_at: cocktail.updated_at,
+      user_id: cocktail.user_id,
+      ingredients: cocktail.ingredients,
+      comments: [], 
+      likes: cocktail.likes?.length ?? 0,
+    }));
+
+    return res.status(200).json(formatted);
+  } catch (error) {
+    console.error("Error al obtener cocteles pendientes:", error);
+    res.status(500).json({ mensaje: "Error del servidor" });
+  }
+}
+
+exports.aproveCocktail = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const cocktail = await Cocktail.findByPk(id);
+
+    if (!cocktail) {
+      return res.status(404).json({ mensaje: "La receta no existe" });
+    }
+    if (cocktail.updatedAt.getTime() !== new Date(req.body.lastUpdated).getTime()) {
+      return res.status(409).json({ 
+        mensaje: "La receta ha sido modificada. Por favor, actualice la página e intente de nuevo." 
+      });
+    }
+
+    cocktail.status = "aceptada";
+    await cocktail.save();
+
+    return res.status(200).json({ mensaje: "La receta ha sido aceptada correctamente" });
+
+  } catch (error) {
+    console.error("Error al aceptar la receta:", error);
+    return res.status(500).json({
+      mensaje: "No pudimos establecer conexión con el servidor. Por favor intente más tarde."
+    });
+  }
+}
+exports.rejectCocktail = async (req, res) => {
+  const { id } = req.params;
+  const { reason } = req.body;
+
+  try {
+    const cocktail = await Cocktail.findByPk(id);
+
+    if (!cocktail) {
+      return res.status(404).json({ mensaje: "La receta no existe" });
+    }
+
+    if (cocktail.status !== "pendiente de revision") {
+      return res.status(400).json({ 
+        mensaje: "Solo se pueden rechazar recetas pendientes de revisión" 
+      });
+    }
+
+    cocktail.status = "rechazada";
+    cocktail.rejection_reason = reason;
+    await cocktail.save();
+
+    return res.status(200).json({ 
+      mensaje: "La receta ha sido rechazada correctamente",
+      reason: reason
+    });
+
+  } catch (error) {
+    console.error("Error al rechazar la receta:", error);
+    return res.status(500).json({
+      mensaje: "No pudimos establecer conexión con el servidor. Por favor intente más tarde."
+    });
+  }
+};
+exports.rejectCocktail = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const cocktail = await Cocktail.findByPk(id);
+
+    if (!cocktail) {
+      return res.status(404).json({ mensaje: "La receta no existe" });
+    }
+    if (cocktail.updatedAt.getTime() !== new Date(req.body.lastUpdated).getTime()) {
+      return res.status(409).json({ 
+        mensaje: "La receta ha sido modificada. Por favor, actualice la página e intente de nuevo." 
+      });
+    }
+
+    cocktail.status = "rechazada";
+    await cocktail.save();
+
+    return res.status(200).json({ mensaje: "La receta ha sido rechazada correctamente" });
+
+  } catch (error) {
+    console.error("Error al rechazar la receta:", error);
+    return res.status(500).json({
+      mensaje: "No pudimos establecer conexión con el servidor. Por favor intente más tarde."
+    });
+  }
+}
