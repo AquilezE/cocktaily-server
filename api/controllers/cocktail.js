@@ -62,6 +62,48 @@ exports.createRecipe = async (req, res) => {
   }
 };
 
+exports.getAllAcceptedCocktails = async (req, res) => {
+  try {
+    const cocktails = await db.Cocktail.findAll({
+      where: { status: 'aceptada' },
+      include: [
+        {
+          model: db.Ingredient,
+          as: 'ingredients',
+          through: { attributes: ['quantity'] }
+        },
+        {
+          model: db.Like,
+          as: 'likes'
+        }
+      ],
+      order: [['createdAt', 'DESC']]
+    });
+
+    const formatted = cocktails.map(cocktail => ({
+      id: cocktail.id,
+      name: cocktail.name,
+      creation_steps: cocktail.creation_steps,
+      preparation_time: cocktail.preparation_time,
+      is_non_alcoholic: cocktail.is_non_alcoholic,
+      alcohol_type: cocktail.alcohol_type,
+      video_url: cocktail.video_url,
+      image_url: cocktail.image_url,
+      created_at: cocktail.created_at,
+      updated_at: cocktail.updated_at,
+      user_id: cocktail.user_id,
+      ingredients: cocktail.ingredients,
+      comments: [], // puedes agregar los comentarios si los necesitas
+      likes: cocktail.likes?.length ?? 0,
+    }));
+
+    return res.status(200).json(formatted);
+  } catch (error) {
+    console.error("Error al obtener cocteles aceptados:", error);
+    res.status(500).json({ mensaje: "Error del servidor" });
+  }
+};
+
 exports.getRecipeById = async (req, res) => {
   const { id } = req.params;
 
