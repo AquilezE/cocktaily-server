@@ -20,6 +20,13 @@ const Authorize = (rol) =>{
             return res.status(403).json({ message: 'No tienes permisos para acceder a este recurso' });
         }
 
+        req.user = {
+            id: decodedToken[ClaimTypes.NameIdentifier],
+            username: decodedToken[ClaimTypes.Name],
+            fullName: decodedToken[ClaimTypes.GivenName],
+            role: decodedToken[ClaimTypes.Role]
+      };
+
         var tiempoRestanteToken = (decodedToken.exp - (new Date()).getTime() / 1000);
         
         

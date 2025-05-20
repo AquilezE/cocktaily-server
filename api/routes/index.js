@@ -9,5 +9,6 @@ router.use('/v1/usuarios', require('./user'));
 router.use('/v1/cocktails', require('./cocktail'));
 router.use('/v1/livesession', require('./livesession'));
 router.use('/v1/upload', require('./upload'));
+router.use('/v1/likes', require('./like'));
 
 module.exports = router;

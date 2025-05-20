@@ -3,8 +3,9 @@ const jwtSecret = process.env.JWT_SECRET;
 const ClaimTypes = require('../config/claimTypes');
 
 
-const GenerarToken = (email, username, role) => {
+const GenerarToken = (id, email, username, role) => {
     const token = jwt.sign({
+        [ClaimTypes.NameIdentifier]: id,
         [ClaimTypes.Name]: email,
         [ClaimTypes.GivenName]: username,
         [ClaimTypes.Role]: role,
