@@ -23,7 +23,7 @@ module.exports = {
 
   down: async (queryInterface, Sequelize) => {
     await queryInterface.changeColumn('Cocktails', 'image_url', {
-      type: Sequelize.STRING, // Ajusta si antes era otro tipo
+      type: Sequelize.STRING,
       allowNull: false,
     });
 
