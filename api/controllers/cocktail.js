@@ -1,5 +1,6 @@
 const db = require("../models");
 const { Cocktail, CocktailIngredient } = db;
+const {Op}= require("sequelize");
 
 exports.createRecipe = async (req, res) => {
   const {
@@ -64,8 +65,34 @@ exports.createRecipe = async (req, res) => {
 
 exports.getAllAcceptedCocktails = async (req, res) => {
   try {
+    const { alcoholType, name, maxPreparationTime, isNonAlcoholic } = req.query;
+
+    const where = {
+      status: 'aceptada'
+    };
+
+    if (alcoholType) {
+      where.alcohol_type = alcoholType;
+    }
+
+    if (typeof isNonAlcoholic !== 'undefined') {
+      where.is_non_alcoholic = isNonAlcoholic === 'true';
+    }
+
+    if (name) {
+      where.name = {
+        [db.Sequelize.Op.Like]: `%${name}%`  
+      };
+    }
+
+    if (maxPreparationTime) {
+      where.preparation_time = {
+        [db.Sequelize.Op.lte]: parseInt(maxPreparationTime)
+      };
+    }
+
     const cocktails = await db.Cocktail.findAll({
-      where: { status: 'aceptada' },
+      where,
       include: [
         {
           model: db.Ingredient,
@@ -93,20 +120,20 @@ exports.getAllAcceptedCocktails = async (req, res) => {
       updated_at: cocktail.updated_at,
       user_id: cocktail.user_id,
       ingredients: cocktail.ingredients,
-      comments: [], // puedes agregar los comentarios si los necesitas
+      comments: [],
       likes: cocktail.likes?.length ?? 0,
     }));
 
     return res.status(200).json(formatted);
   } catch (error) {
-    console.error("Error al obtener cocteles aceptados:", error);
-    res.status(500).json({ mensaje: "Error del servidor" });
+    console.error("Error al obtener cócteles con filtros:", error);
+    res.status(500).json({ mensaje: "Errorasdas del servidor" });
   }
 };
 
 exports.getRecipeById = async (req, res) => {
   const { id } = req.params;
-
+console.log('GET receta id:', req.params.id);
   try {
     const recipe = await Cocktail.findOne({
       where: {
