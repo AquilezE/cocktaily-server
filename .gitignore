@@ -1,3 +1,5 @@
 api/node_modules/
 api/.env
 .vagrant/
+api/uploads/*
+!api/uploads/.gitkeep

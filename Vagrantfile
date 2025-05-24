@@ -8,7 +8,7 @@ Vagrant.configure("2") do |config|
 
   config.vm.define "nginxRMTP" do |nginxRMTP|
     nginxRMTP.vm.hostname = "static"
-    nginxRMTP.vm.network "public_network", ip: "192.168.100.13"
+    nginxRMTP.vm.network "public_network", ip: "192.168.1.13"
     nginxRMTP.vm.provision "ansible_local" do |ansible|
       ansible.playbook = "provision-nginxRMTP.yml"
     end
@@ -27,7 +27,7 @@ Vagrant.configure("2") do |config|
 
   config.vm.define "mysql" do |mysql|
     mysql.vm.hostname = "mysqlStream"
-    mysql.vm.network "public_network", ip: "192.168.100.15"
+    mysql.vm.network "public_network", ip: "192.168.1.15"
     mysql.vm.provision "ansible_local" do |ansible|
       ansible.playbook = "provision-mysql.yml"
     end
