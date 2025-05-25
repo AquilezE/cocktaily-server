@@ -63,7 +63,7 @@ exports.giveLike = async (req, res) => {
         };
         const response = await getMessaging().sendEachForMulticast(multicastMsg);
 
-        console.log(`${response.successCount}/${tokens.length} notificaciones enviadas`);
+        console.log(`${response.successCount}/${tokens.length} notificaciones enviadas a ${tokens}`);
         if (response.failureCount > 0) {
           response.responses.forEach((resp, idx) => {
             if (!resp.success) {
