@@ -20,7 +20,36 @@ module.exports = {
       next(err);
     }
   },
+async changePassword(req, res, next) {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    const userId = req.params.id;
 
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ error: 'Contraseña actual y nueva son requeridas' });
+    }
+
+    const user = await User.findByPk(userId);
+
+    if (!user) {
+      return res.status(404).json({ error: 'Usuario no encontrado' });
+    }
+
+    const isMatch = await bcrypt.compare(currentPassword, user.password_hash);
+    if (!isMatch) {
+      return res.status(401).json({ error: 'Contraseña actual incorrecta' });
+    }
+
+    const newHashedPassword = await bcrypt.hash(newPassword, 10);
+    user.password_hash = newHashedPassword;
+    await user.save();
+
+    res.status(200).json({ message: 'Contraseña actualizada correctamente' });
+
+  } catch (err) {
+    next(err);
+  }
+},
   async create(req, res, next) {
     try {
       const { username, email, password, profile_picture_path, bio, role } = req.body;
