@@ -8,6 +8,8 @@ router.post('/', controller.create);
 router.get('/:id', controller.getById);
 router.put('/:id', controller.update);
 //router.post('/:id/change-password',Authorize('user,admin'),controller.changePassword);
-router.post('/:id/change-password',controller.changePassword);
+router.patch('/:id/change-password',controller.changePassword);
 router.delete('/:id', controller.remove);
 module.exports = router;
+
+
