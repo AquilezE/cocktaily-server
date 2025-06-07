@@ -14,6 +14,10 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'user_id',
         as: 'author'
       });
+      this.belongsTo(models.Cocktail, {
+        foreignKey: 'cocktail_id',
+        as: 'cocktail'
+      });
     }
   }
   Comment.init({

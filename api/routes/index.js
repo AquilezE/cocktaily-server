@@ -13,7 +13,6 @@ router.use('/v1/likes', require('./like'));
 router.use('/v1/devices', require('./devices'));
 router.use('/v1/verification', require('./vetification'));
 router.use('/v1/stats', require('./stats'));
-
-
+router.use('/v1/comments', require('./comments'));
 
 module.exports = router;
