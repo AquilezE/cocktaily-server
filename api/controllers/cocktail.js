@@ -159,7 +159,7 @@ console.log('GET receta id:', req.params.id);
           include: {
             model: db.User,
             as: 'author',
-            attributes: ['id', 'username']
+            attributes: ['id', 'username', 'profile_picture_path']
           }
         },
         {
