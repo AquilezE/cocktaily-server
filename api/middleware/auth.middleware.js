@@ -9,8 +9,16 @@ const Authorize = (rol) =>{
     return async (req, res, next) => {
     try{
         const authHeader = req.headers['authorization'];
+
+    console.log('→ middleware sees headers:', req.headers);
+    // or more specifically:
+    console.log('→ middleware sees Authorization header:', req.get('Authorization'));
+
+
         if (!authHeader.startsWith('Bearer ')) {
+            
             return res.status(401).json({ message: 'Token no valido'});
+            
         }
 
         const token = authHeader.split(' ')[1];
