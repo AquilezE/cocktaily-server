@@ -1,6 +1,6 @@
 const db = require("../models");
 const { Cocktail, CocktailIngredient } = db;
-const {Op}= require("sequelize");
+const { Op } = require('sequelize');
 
 exports.createRecipe = async (req, res) => {
   const {
@@ -81,7 +81,7 @@ exports.getAllAcceptedCocktails = async (req, res) => {
 
     if (name) {
       where.name = {
-        [db.Sequelize.Op.Like]: `%${name}%`  
+        [Op.like]: `%${name}%`  
       };
     }
 
@@ -159,7 +159,7 @@ console.log('GET receta id:', req.params.id);
           include: {
             model: db.User,
             as: 'author',
-            attributes: ['id', 'username']
+            attributes: ['id', 'username', 'profile_picture_path']
           }
         },
         {
