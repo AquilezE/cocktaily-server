@@ -3,7 +3,7 @@
 <html lang="en">
 
 <head>
-    <title>Code coverage report for api/services/jwtoken.service.js</title>
+    <title>Code coverage report for api/controllers/comment.js</title>
     <meta charset="utf-8" />
     <link rel="stylesheet" href="../../prettify.css" />
     <link rel="stylesheet" href="../../base.css" />
@@ -19,13 +19,13 @@
 <body>
 <div class='wrapper'>
     <div class='pad1'>
-        <h1><a href="../../index.html">All files</a> / <a href="index.html">api/services</a> jwtoken.service.js</h1>
+        <h1><a href="../../index.html">All files</a> / <a href="index.html">api/controllers</a> comment.js</h1>
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">28.57% </span>
+                <span class="strong">12.76% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>14/49</span>
+                <span class='fraction'>6/47</span>
             </div>
         
             
@@ -44,9 +44,9 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">28.57% </span>
+                <span class="strong">12.76% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>14/49</span>
+                <span class='fraction'>6/47</span>
             </div>
         
             
@@ -109,29 +109,7 @@
 <a name='L44'></a><a href='#L44'>44</a>
 <a name='L45'></a><a href='#L45'>45</a>
 <a name='L46'></a><a href='#L46'>46</a>
-<a name='L47'></a><a href='#L47'>47</a>
-<a name='L48'></a><a href='#L48'>48</a>
-<a name='L49'></a><a href='#L49'>49</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<a name='L47'></a><a href='#L47'>47</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
@@ -157,57 +135,73 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span></td><td class="text"><pre class="prettyprint lang-js">const jwt = require('jsonwebtoken');
-const jwtSecret = process.env.JWT_SECRET;
-const ClaimTypes = require('../config/claimTypes');
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">const db = require('../models');
+const { Comment, User } = db;
 &nbsp;
-&nbsp;
-const GenerarToken = <span class="fstat-no" title="function not covered" >(id, email, username, role) =&gt; {</span>
-<span class="cstat-no" title="statement not covered" >    const token = jwt.sign({</span>
-<span class="cstat-no" title="statement not covered" >        [ClaimTypes.NameIdentifier]: id,</span>
-<span class="cstat-no" title="statement not covered" >        [ClaimTypes.Name]: email,</span>
-<span class="cstat-no" title="statement not covered" >        [ClaimTypes.GivenName]: username,</span>
-<span class="cstat-no" title="statement not covered" >        [ClaimTypes.Role]: role,</span>
-<span class="cstat-no" title="statement not covered" >        "iss": "cocteles",</span>
-<span class="cstat-no" title="statement not covered" >        "aud": "coctelesUsuarios"</span>
-<span class="cstat-no" title="statement not covered" >    },</span>
-<span class="cstat-no" title="statement not covered" >    jwtSecret, {</span>
-<span class="cstat-no" title="statement not covered" >        expiresIn: '1h',</span>
-<span class="cstat-no" title="statement not covered" >        algorithm: 'HS256'</span>
-<span class="cstat-no" title="statement not covered" >    }</span>
-<span class="cstat-no" title="statement not covered" >)</span>
-<span class="cstat-no" title="statement not covered" >    return token;</span>
-<span class="cstat-no" title="statement not covered" >} </span>
-&nbsp;
-&nbsp;
-const TiempoRestanteToken = (<span class="fstat-no" title="function not covered" >req) =&gt; {</span>
+exports.createComment = <span class="fstat-no" title="function not covered" >async (req, res) =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >  const { user_id, cocktail_id, text } = req.body;</span>
 <span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >    try{</span>
-<span class="cstat-no" title="statement not covered" >        const authHeader = req.headers['authorization'];</span>
-<span class="cstat-no" title="statement not covered" >        if (!authHeader.startsWith('Bearer ')) {</span>
-<span class="cstat-no" title="statement not covered" >            return null;</span>
+<span class="cstat-no" title="statement not covered" >  if (!user_id || !cocktail_id || !text) {</span>
+<span class="cstat-no" title="statement not covered" >    return res.status(400).json({ mensaje: "Faltan datos obligatorios" });</span>
+<span class="cstat-no" title="statement not covered" >  }</span>
+<span class="cstat-no" title="statement not covered" ></span>
+<span class="cstat-no" title="statement not covered" >  try {</span>
+<span class="cstat-no" title="statement not covered" >    const nuevoComentario = await Comment.create({</span>
+<span class="cstat-no" title="statement not covered" >      user_id,</span>
+<span class="cstat-no" title="statement not covered" >      cocktail_id,</span>
+<span class="cstat-no" title="statement not covered" >      text,</span>
+<span class="cstat-no" title="statement not covered" >      created_at: new Date()</span>
+<span class="cstat-no" title="statement not covered" >    });</span>
+<span class="cstat-no" title="statement not covered" ></span>
+<span class="cstat-no" title="statement not covered" >    return res.status(201).json(nuevoComentario);</span>
+<span class="cstat-no" title="statement not covered" >  } catch (error) {</span>
+<span class="cstat-no" title="statement not covered" >    console.error("Error al crear comentario:", error);</span>
+<span class="cstat-no" title="statement not covered" >    return res.status(500).json({ mensaje: "Error interno del servidor" });</span>
+<span class="cstat-no" title="statement not covered" >  }</span>
+<span class="cstat-no" title="statement not covered" >};</span>
+&nbsp;
+exports.getCommentsByCocktail = <span class="fstat-no" title="function not covered" >async (req, res) =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >  const { id } = req.params;</span>
+<span class="cstat-no" title="statement not covered" ></span>
+<span class="cstat-no" title="statement not covered" >  try {</span>
+<span class="cstat-no" title="statement not covered" >    const comments = await Comment.findAll({</span>
+<span class="cstat-no" title="statement not covered" >      where: { cocktail_id: id },</span>
+<span class="cstat-no" title="statement not covered" >      include: [</span>
+<span class="cstat-no" title="statement not covered" >        {</span>
+<span class="cstat-no" title="statement not covered" >          model: User,</span>
+<span class="cstat-no" title="statement not covered" >          as: 'author',</span>
+<span class="cstat-no" title="statement not covered" >          attributes: ['id', 'username', 'profile_picture_path']</span>
 <span class="cstat-no" title="statement not covered" >        }</span>
+<span class="cstat-no" title="statement not covered" >      ],</span>
+<span class="cstat-no" title="statement not covered" >      order: [['created_at', 'DESC']]</span>
+<span class="cstat-no" title="statement not covered" >    });</span>
 <span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >        const token = authHeader.split(' ')[1];</span>
-<span class="cstat-no" title="statement not covered" >        const decodedToken = jwt.verify(token, jwtSecret);</span>
-<span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >        const time = (decodedToken.exp * 1000) - Date.now();</span>
-<span class="cstat-no" title="statement not covered" >        const minutes = Math.floor(time / 60000);</span>
-<span class="cstat-no" title="statement not covered" >        const seconds = Math.floor((time % 60000) / 1000);</span>
-<span class="cstat-no" title="statement not covered" >        return { minutes, seconds };</span>
-<span class="cstat-no" title="statement not covered" >    }catch(error){</span>
-<span class="cstat-no" title="statement not covered" >        console.log(error);</span>
-<span class="cstat-no" title="statement not covered" >        return null;</span>
-<span class="cstat-no" title="statement not covered" >    }</span>
-<span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >}</span>
-&nbsp;
-module.exports = {
-    GenerarToken,
-    TiempoRestanteToken
-}</pre></td></tr></table></pre>
+<span class="cstat-no" title="statement not covered" >    return res.status(200).json(comments);</span>
+<span class="cstat-no" title="statement not covered" >  } catch (error) {</span>
+<span class="cstat-no" title="statement not covered" >    console.error("Error al obtener comentarios:", error);</span>
+<span class="cstat-no" title="statement not covered" >    return res.status(500).json({ mensaje: "Error interno del servidor" });</span>
+<span class="cstat-no" title="statement not covered" >  }</span>
+<span class="cstat-no" title="statement not covered" >};</span></pre></td></tr></table></pre>
 
                 <div class='push'></div><!-- for sticky footer -->
             </div><!-- /wrapper -->

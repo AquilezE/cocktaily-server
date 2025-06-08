@@ -3,7 +3,7 @@
 <html lang="en">
 
 <head>
-    <title>Code coverage report for api/models/livesession.js</title>
+    <title>Code coverage report for api/models/verificationrequest.js</title>
     <meta charset="utf-8" />
     <link rel="stylesheet" href="../../prettify.css" />
     <link rel="stylesheet" href="../../base.css" />
@@ -19,13 +19,13 @@
 <body>
 <div class='wrapper'>
     <div class='pad1'>
-        <h1><a href="../../index.html">All files</a> / <a href="index.html">api/models</a> livesession.js</h1>
+        <h1><a href="../../index.html">All files</a> / <a href="index.html">api/models</a> verificationrequest.js</h1>
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
                 <span class="strong">100% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>35/35</span>
+                <span class='fraction'>25/25</span>
             </div>
         
             
@@ -46,7 +46,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">100% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>35/35</span>
+                <span class='fraction'>25/25</span>
             </div>
         
             
@@ -87,27 +87,7 @@
 <a name='L22'></a><a href='#L22'>22</a>
 <a name='L23'></a><a href='#L23'>23</a>
 <a name='L24'></a><a href='#L24'>24</a>
-<a name='L25'></a><a href='#L25'>25</a>
-<a name='L26'></a><a href='#L26'>26</a>
-<a name='L27'></a><a href='#L27'>27</a>
-<a name='L28'></a><a href='#L28'>28</a>
-<a name='L29'></a><a href='#L29'>29</a>
-<a name='L30'></a><a href='#L30'>30</a>
-<a name='L31'></a><a href='#L31'>31</a>
-<a name='L32'></a><a href='#L32'>32</a>
-<a name='L33'></a><a href='#L33'>33</a>
-<a name='L34'></a><a href='#L34'>34</a>
-<a name='L35'></a><a href='#L35'>35</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
+<a name='L25'></a><a href='#L25'>25</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
@@ -136,35 +116,25 @@ const {
   Model
 } = require('sequelize');
 module.exports = (sequelize, DataTypes) =&gt; {
-  class LiveSession extends Model {
+  class VerificationRequest extends Model {
     /**
      * Helper method for defining associations.
      * This method is not a part of Sequelize lifecycle.
      * The `models/index` file will call this method automatically.
      */
     static associate(models) {
-      this.belongsTo(models.User, {
-        foreignKey: 'user_id',
-        as: 'host',
-      });
-      this.hasMany(models.ChatMessage, {
-        foreignKey: 'session_id',
-        as: 'messages',
-      });
+      // define association here
     }
   }
-  LiveSession.init({
-    user_id: DataTypes.INTEGER,
-    title: DataTypes.STRING,
-    stream_key: DataTypes.STRING,
-    url: DataTypes.STRING,
-    started_at: DataTypes.DATE,
-    ended_at: DataTypes.DATE
+  VerificationRequest.init({
+    email: DataTypes.STRING,
+    code: DataTypes.STRING,
+    expiresAt: DataTypes.DATE
   }, {
     sequelize,
-    modelName: 'LiveSession',
+    modelName: 'VerificationRequest',
   });
-  return LiveSession;
+  return VerificationRequest;
 };</pre></td></tr></table></pre>
 
                 <div class='push'></div><!-- for sticky footer -->
