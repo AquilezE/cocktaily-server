@@ -1,6 +1,7 @@
 const db = require("../models");
 const { Cocktail, CocktailIngredient } = db;
 const { Op } = require('sequelize');
+const { sendCocktailRejectionEmail, sendCocktailApprovalEmail } = require('../services/mailer');
 
 exports.createRecipe = async (req, res) => {
   const {
@@ -271,21 +272,26 @@ exports.aproveCocktail = async (req, res) => {
   const { id } = req.params;
 
   try {
-    const cocktail = await Cocktail.findByPk(id);
+    const cocktail = await db.Cocktail.findByPk(id, {
+      include: [{ model: db.User, as: 'author', attributes: ['email'] }]
+    });
 
     if (!cocktail) {
       return res.status(404).json({ mensaje: "La receta no existe" });
-    }
-    if (cocktail.updatedAt.getTime() !== new Date(req.body.lastUpdated).getTime()) {
-      return res.status(409).json({ 
-        mensaje: "La receta ha sido modificada. Por favor, actualice la página e intente de nuevo." 
-      });
     }
 
     cocktail.status = "aceptada";
     await cocktail.save();
 
-    return res.status(200).json({ mensaje: "La receta ha sido aceptada correctamente" });
+    if (cocktail.author?.email) {
+      try {
+        await sendCocktailApprovalEmail(cocktail.author.email, cocktail.name);
+      } catch (e) {
+        console.error("Error enviando correo de aprobación:", e);
+      }
+    }
+
+    return res.status(200).json({ mensaje: "La receta ha sido aceptada correctamente y se notificó al autor por correo." });
 
   } catch (error) {
     console.error("Error al aceptar la receta:", error);
@@ -293,64 +299,88 @@ exports.aproveCocktail = async (req, res) => {
       mensaje: "No pudimos establecer conexión con el servidor. Por favor intente más tarde."
     });
   }
-}
+};
+
 exports.rejectCocktail = async (req, res) => {
   const { id } = req.params;
   const { reason } = req.body;
 
   try {
-    const cocktail = await Cocktail.findByPk(id);
+    const cocktail = await db.Cocktail.findByPk(id, {
+      include: [{
+        model: db.User,
+        as: 'author',
+        attributes: ['email', 'username']
+      }]
+    });
 
     if (!cocktail) {
       return res.status(404).json({ mensaje: "La receta no existe" });
     }
 
-    if (cocktail.status !== "pendiente de revision") {
-      return res.status(400).json({ 
-        mensaje: "Solo se pueden rechazar recetas pendientes de revisión" 
-      });
+    if (!reason || typeof reason !== 'string') {
+      return res.status(400).json({ mensaje: "Debes proporcionar un motivo de rechazo válido." });
     }
 
     cocktail.status = "rechazada";
-    cocktail.rejection_reason = reason;
     await cocktail.save();
 
-    return res.status(200).json({ 
-      mensaje: "La receta ha sido rechazada correctamente",
-      reason: reason
-    });
+    const email = cocktail.author?.email;
+    if (email) {
+      try {
+        await sendCocktailRejectionEmail(email, cocktail.name, reason);
+      } catch (e) {
+        console.error("Error enviando correo:", e);
+      }
+    }
+
+    return res.status(200).json({ mensaje: "Receta rechazada y notificada por correo." });
 
   } catch (error) {
     console.error("Error al rechazar la receta:", error);
-    return res.status(500).json({
-      mensaje: "No pudimos establecer conexión con el servidor. Por favor intente más tarde."
-    });
+    return res.status(500).json({ mensaje: "Error interno del servidor." });
   }
 };
-exports.rejectCocktail = async (req, res) => {
+
+exports.getFullRecipeById = async (req, res) => {
   const { id } = req.params;
-
   try {
-    const cocktail = await Cocktail.findByPk(id);
-
-    if (!cocktail) {
-      return res.status(404).json({ mensaje: "La receta no existe" });
-    }
-    if (cocktail.updatedAt.getTime() !== new Date(req.body.lastUpdated).getTime()) {
-      return res.status(409).json({ 
-        mensaje: "La receta ha sido modificada. Por favor, actualice la página e intente de nuevo." 
-      });
-    }
-
-    cocktail.status = "rechazada";
-    await cocktail.save();
-
-    return res.status(200).json({ mensaje: "La receta ha sido rechazada correctamente" });
-
-  } catch (error) {
-    console.error("Error al rechazar la receta:", error);
-    return res.status(500).json({
-      mensaje: "No pudimos establecer conexión con el servidor. Por favor intente más tarde."
+    const recipe = await db.Cocktail.findOne({
+      where: { id },
+      include: [
+        {
+          model: db.User,
+          as: 'author',
+          attributes: ['id', 'username']
+        },
+        {
+          model: db.Ingredient,
+          as: 'ingredients',
+          through: { attributes: ['quantity'] }
+        }
+      ]
     });
+
+    if (!recipe) {
+      return res.status(404).json({ mensaje: 'Receta no encontrada' });
+    }
+
+    return res.status(200).json({
+      id: recipe.id,
+      name: recipe.name,
+      creation_steps: recipe.creation_steps,
+      preparation_time: recipe.preparation_time,
+      is_non_alcoholic: recipe.is_non_alcoholic,
+      alcohol_type: recipe.alcohol_type,
+      video_url: recipe.video_url,
+      image_url: recipe.image_url,
+      created_at: recipe.created_at,
+      updated_at: recipe.updated_at,
+      author: recipe.author,
+      ingredients: recipe.ingredients
+    });
+  } catch (error) {
+    console.error("Error al obtener receta completa:", error);
+    return res.status(500).json({ mensaje: 'Error interno del servidor' });
   }
-}
+};
