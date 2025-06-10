@@ -3,6 +3,8 @@
 const db = require('../models');
 const LiveSession = db.LiveSession;
 const randomWords = require('random-words');
+const { Cocktail} = require('../models');
+
 
 exports.createSession = async (req, res) => {
   const { user_id, title } = req.body;
@@ -11,10 +13,22 @@ exports.createSession = async (req, res) => {
   }
 
   try {
-    const word = randomWords.generate({ exactly: 1, minLength:5, maxLength: 10 })[0];
+    const approvedCount = await Cocktail.count({
+      where: {
+        user_id: user_id,
+        status: 'aceptada'
+      }
+    });
+
+    if (approvedCount < 5) {
+      return res.status(403).json({
+        mensaje: 'Debes tener al menos 5 cócteles aceptados para crear una sesión en vivo.'
+      });
+    }
+
+    const word = randomWords.generate({ exactly: 1, minLength: 5, maxLength: 10 })[0];
     const number = Math.floor(1000 + Math.random() * 9000);
     const stream_key = `${word}${number}`;
-
     const url = `http://${process.env.TRANSMISION_IP}/live/${stream_key}.m3u8`;
 
     const session = await LiveSession.create({
