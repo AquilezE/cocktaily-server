@@ -10,8 +10,12 @@ async function sendCode(req, res) {
   }
 
   const code = crypto.randomInt(100000, 999999).toString();
-  const expiresAt = new Date(Date.now() + 10 * 60 * 1000); 
-  await VerificationRequest.upsert({ email, code, expiresAt });
+  const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
+
+  await VerificationRequest.destroy({ where: { email } });
+
+  await VerificationRequest.create({ email, code, expiresAt });
+
   await sendVerificationCode(email, code);
 
   res.status(200).json({ message: 'Código enviado al correo' });
@@ -24,16 +28,20 @@ async function verifyCode(req, res) {
     return res.status(400).json({ error: 'Email y código son requeridos' });
   }
 
-  const request = await VerificationRequest.findOne({ where: { email } });
+  const request = await VerificationRequest.findOne({
+    where: { email },
+    order: [['createdAt', 'DESC']], 
+  });
 
   if (!request || request.code !== code || new Date() > request.expiresAt) {
     return res.status(400).json({ error: 'Código inválido o expirado' });
   }
 
-  await request.destroy(); 
+  await request.destroy();
 
   res.status(200).json({ message: 'Correo verificado correctamente' });
 }
+
 
 module.exports = {
   sendCode,
