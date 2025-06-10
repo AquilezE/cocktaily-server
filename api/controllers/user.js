@@ -88,7 +88,6 @@ async changePassword(req, res, next) {
     }
   },
 
-
     async getByUsername(req, res, next) {
       try {
         const usuario = await User.findOne({
