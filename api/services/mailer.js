@@ -34,7 +34,7 @@ Ya está disponible públicamente en la aplicación y otros usuarios pueden verl
 
 Gracias por compartir tu creatividad con la comunidad de coctelería. ¡Sigue creando más deliciosas recetas!
 
-🥂 El equipo de CoctelesApp
+🥂 El equipo de Cocktaily
 `,
   });
 }

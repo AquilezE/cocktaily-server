@@ -21,6 +21,22 @@ exports.createRecipe = async (req, res) => {
   }
 
   try {
+    const existing = await Cocktail.findOne({
+      where: {
+        status: 'aceptada',
+        [db.Sequelize.Op.and]: db.Sequelize.where(
+          db.Sequelize.fn('LOWER', db.Sequelize.col('name')),
+          name.toLowerCase()
+        )
+      }
+    });
+
+    if (existing) {
+      return res.status(409).json({
+        mensaje: "Ya existe una receta aceptada con ese nombre. Por favor utiliza otro nombre."
+      });
+    }
+
     const newRecipe = await Cocktail.create({
       name,
       creation_steps,
