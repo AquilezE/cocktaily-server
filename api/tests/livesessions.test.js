@@ -1,11 +1,22 @@
+jest.mock('../middleware/auth.middleware', () => ({
+  Authorize: () => (req, res, next) => next()
+}));
+
 jest.mock('../models', () => {
   const realDb = jest.requireActual('../models');
   return {
     ...realDb,
     LiveSession: {
-      create:  jest.fn(),
+      create: jest.fn(),
       findAll: jest.fn(),
-      findByPk: jest.fn()
+      findByPk: jest.fn(),
+    },
+    Cocktail: {
+      count: jest.fn()
+    },
+    sequelize: {
+      ...realDb.sequelize,
+      authenticate: jest.fn().mockResolvedValue(),
     }
   };
 });
@@ -37,7 +48,7 @@ describe('LiveSession Routes', () => {
 
   describe('POST /api/v1/livesession', () => {
     it('400 when missing fields', async () => {
-      const res = await request(app).post('/api/v1/livesession').send({ user_id: 'u1' });
+      const res = await request(app).post('/api/v1/livesession').set('Authorization', `Bearer ${global.userToken}`).send({ user_id: 'u1' });
       expect(res.statusCode).toBe(400);
       expect(res.body).toEqual({ mensaje: 'Faltan campos obligatorios.' });
     });

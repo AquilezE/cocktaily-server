@@ -1,4 +1,16 @@
 
+jest.mock('../middleware/auth.middleware', () => ({
+  Authorize: () => (req, res, next) => {
+    req.user = { id: 'u1', username: 'joe' };
+    next();
+  }
+}));
+
+jest.mock('../services/mailer', () => ({
+  sendCocktailApprovalEmail: jest.fn(),
+  sendCocktailRejectionEmail: jest.fn()
+}));
+
 jest.mock('../models', () => {
   const realDb = jest.requireActual('../models');
 
@@ -24,7 +36,10 @@ jest.mock('../models', () => {
 
 const request = require('supertest');
 const app     = require('../app');               
-
+const {
+  sendCocktailApprovalEmail,
+  sendCocktailRejectionEmail
+} = require('../services/mailer');
 
 const db = require('../models');    
 const { Cocktail, Ingredient, CocktailIngredient } = db;
@@ -146,39 +161,6 @@ describe('GET /api/v1/cocktails/:id', () => {
   });
 });
 
-describe('PUT /api/v1/cocktails/accept/:id', () => {
-  it('404 if not exist', async () => {
-    Cocktail.findByPk.mockResolvedValue(null);
-    const res = await request(app).patch('/api/v1/cocktails/accept/r1')
-    expect(res.statusCode).toBe(404);
-  });
-
-  it('409 on timestamp mismatch', async () => {
-    const dt = new Date('2025-01-01');
-    Cocktail.findByPk.mockResolvedValue({
-      updatedAt: dt,
-      save: jest.fn()
-    });
-    const res = await request(app)
-      .patch('/api/v1/cocktails/accept/r1')
-      .send({ lastUpdated: '2025-01-02' });
-
-    expect(res.statusCode).toBe(409);
-  });
-
-  it('200 on success', async () => {
-    const now = new Date();
-    const fake = { updatedAt: now, save: jest.fn() };
-    Cocktail.findByPk.mockResolvedValue(fake);
-
-    const res = await request(app)
-      .patch('/api/v1/cocktails/accept/r1')
-      .send({ lastUpdated: now.toISOString() });
-
-    expect(res.statusCode).toBe(200);
-    expect(fake.save).toHaveBeenCalled();
-  });
-});
 
 describe('POST /api/v1/cocktails', () => {
   const valid = {
@@ -374,58 +356,108 @@ describe('GET /api/v1/cocktails/pending', () => {
 });
 
 
+
 describe('PATCH /api/v1/cocktails/accept/:id', () => {
   it('404 if not exist', async () => {
     Cocktail.findByPk.mockResolvedValue(null);
     const res = await request(app).patch('/api/v1/cocktails/accept/r1');
     expect(res.statusCode).toBe(404);
+    expect(res.body).toEqual({ mensaje: 'La receta no existe' });
   });
 
-  it('409 on timestamp mismatch', async () => {
-    const dt = new Date('2025-01-01');
-    Cocktail.findByPk.mockResolvedValue({ updatedAt: dt, save: jest.fn() });
-    const res = await request(app)
-      .patch('/api/v1/cocktails/accept/r1')
-      .send({ lastUpdated: '2025-01-02' });
-    expect(res.statusCode).toBe(409);
-  });
-
-  it('200 on success', async () => {
-    const now = new Date();
-    const fake = { updatedAt: now, save: jest.fn() };
+  it('200 on success & emails author', async () => {
+    const fake = { id:'r1', name:'X', save:jest.fn(), author:{ email:'a@b' } };
     Cocktail.findByPk.mockResolvedValue(fake);
-    const res = await request(app)
-      .patch('/api/v1/cocktails/accept/r1')
-      .send({ lastUpdated: now.toISOString() });
-    expect(res.statusCode).toBe(200);
+    const res = await request(app).patch('/api/v1/cocktails/accept/r1');
     expect(fake.save).toHaveBeenCalled();
+    expect(sendCocktailApprovalEmail).toHaveBeenCalledWith('a@b','X');
+    expect(res.statusCode).toBe(200);
+    expect(res.body.mensaje).toMatch("La receta ha sido aceptada correctamente y se notificó al autor por correo.");
+  });
+
+  it('200 even if email send fails', async () => {
+    const fake = { id:'r2', name:'Y', save:jest.fn(), author:{ email:'b@c' } };
+    Cocktail.findByPk.mockResolvedValue(fake);
+    sendCocktailApprovalEmail.mockRejectedValue(new Error('SMTP'));
+    const res = await request(app).patch('/api/v1/cocktails/accept/r2');
+    expect(res.statusCode).toBe(200);
+  });
+
+  it('500 on DB error', async () => {
+    Cocktail.findByPk.mockRejectedValue(new Error('boom'));
+    const res = await request(app).patch('/api/v1/cocktails/accept/r1');
+    expect(res.statusCode).toBe(500);
+    expect(res.body).toEqual({
+      mensaje: 'No pudimos establecer conexión con el servidor. Por favor intente más tarde.'
+    });
   });
 });
 
 describe('PATCH /api/v1/cocktails/reject/:id', () => {
   it('404 if not exist', async () => {
     Cocktail.findByPk.mockResolvedValue(null);
-    const res = await request(app).patch('/api/v1/cocktails/reject/r1');
-    expect(res.statusCode).toBe(404);
-  });
-
-  it('409 on timestamp mismatch', async () => {
-    const dt = new Date('2025-01-01');
-    Cocktail.findByPk.mockResolvedValue({ updatedAt: dt, save: jest.fn() });
     const res = await request(app)
       .patch('/api/v1/cocktails/reject/r1')
-      .send({ lastUpdated: '2025-01-02' });
-    expect(res.statusCode).toBe(409);
+      .send({ reason: 'nope' });
+    expect(res.statusCode).toBe(404);
+    expect(res.body).toEqual({ mensaje: 'La receta no existe' });
   });
 
-  it('200 on success', async () => {
-    const now = new Date();
-    const fake = { updatedAt: now, save: jest.fn() };
+  it('400 if reason missing or not a string', async () => {
+    const fake = { id:'r1', save:jest.fn(), author:{ email:'x@y' } };
+    Cocktail.findByPk.mockResolvedValue(fake);
+
+    const res1 = await request(app).patch('/api/v1/cocktails/reject/r1').send({});
+    expect(res1.statusCode).toBe(400);
+
+    const res2 = await request(app)
+      .patch('/api/v1/cocktails/reject/r1')
+      .send({ reason: 123 });
+    expect(res2.statusCode).toBe(400);
+  });
+
+  it('200 on success & emails author', async () => {
+    const fake = { id:'r2', name:'Z', save:jest.fn(), author:{ email:'u@v' } };
+    Cocktail.findByPk.mockResolvedValue(fake);
+
+    const res = await request(app)
+      .patch('/api/v1/cocktails/reject/r2')
+      .send({ reason: 'bad taste' });
+
+    expect(fake.save).toHaveBeenCalled();
+    expect(sendCocktailRejectionEmail)
+      .toHaveBeenCalledWith('u@v','Z','bad taste');
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toEqual({ mensaje: 'Receta rechazada y notificada por correo.' });
+  });
+
+  it('200 even if email send fails', async () => {
+    const fake = { id:'r3', name:'W', save:jest.fn(), author:{ email:'m@n' } };
+    Cocktail.findByPk.mockResolvedValue(fake);
+    sendCocktailRejectionEmail.mockRejectedValue(new Error('SMTP'));
+    const res = await request(app)
+      .patch('/api/v1/cocktails/reject/r3')
+      .send({ reason: 'foo' });
+    expect(res.statusCode).toBe(200);
+  });
+
+  it('200 without email if author has no email', async () => {
+    const fake = { id:'r4', name:'K', save:jest.fn(), author:{} };
     Cocktail.findByPk.mockResolvedValue(fake);
     const res = await request(app)
-      .patch('/api/v1/cocktails/reject/r1')
-      .send({ lastUpdated: now.toISOString() });
+      .patch('/api/v1/cocktails/reject/r4')
+      .send({ reason: 'foo' });
+    expect(sendCocktailRejectionEmail).not.toHaveBeenCalled();
     expect(res.statusCode).toBe(200);
-    expect(fake.save).toHaveBeenCalled();
   });
+
+  it('500 on DB error', async () => {
+    Cocktail.findByPk.mockRejectedValue(new Error('boom'));
+    const res = await request(app)
+      .patch('/api/v1/cocktails/reject/r1')
+      .send({ reason: 'x' });
+    expect(res.statusCode).toBe(500);
+    expect(res.body).toEqual({ mensaje: 'Error interno del servidor.' });
+  });
+
 });

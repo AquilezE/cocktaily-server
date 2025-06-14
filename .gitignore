@@ -5,3 +5,4 @@ api/uploads/*
 !api/uploads/.gitkeep
 node_modules/
 api/config/serviceAccountKey.json
+api/coverage/

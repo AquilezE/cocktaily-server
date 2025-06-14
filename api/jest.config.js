@@ -35,6 +35,12 @@ const config = {
   //   "/node_modules/"
   // ],
 
+  coveragePathIgnorePatterns: [
+    "/node_modules/",
+    "/api/services/",
+    "/api/socket/"
+  ],
+
   // Indicates which provider should be used to instrument code for coverage
   coverageProvider: "v8",
 
@@ -45,6 +51,7 @@ const config = {
   //   "lcov",
   //   "clover"
   // ],
+
 
   // An object that configures minimum threshold enforcement for coverage results
   // coverageThreshold: undefined,

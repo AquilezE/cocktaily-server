@@ -95,7 +95,6 @@ describe('POST /api/v1/auth/login', () => {
   });
 
   it('returns 400 if an unexpected error is thrown', async () => {
-    // Force User.findOne to throw
     User.findOne = jest.fn().mockImplementation(() => {
       throw new Error('DB is down');
     });

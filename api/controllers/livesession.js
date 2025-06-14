@@ -43,7 +43,7 @@ exports.createSession = async (req, res) => {
     return res.status(201).json(session);
   } catch (error) {
     console.error('Error al crear LiveSession:', error);
-    return res.status(500).json({ mensaje: 'Error del servidor.' });
+    return res.status(500).json({  mensaje: 'Error del servidor.' });
   }
 };
 
