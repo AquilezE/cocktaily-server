@@ -19,3 +19,11 @@ beforeAll(() => {
                 [ClaimTypes.Role]: 'user'
     },process.env.JWT_SECRET, { expiresIn: '1h' });
 });
+
+beforeAll(() => {
+  jest.spyOn(console, 'log').mockImplementation(() => {});
+})
+
+beforeAll(() => {
+  jest.spyOn(console, 'error').mockImplementation(() => {});
+})

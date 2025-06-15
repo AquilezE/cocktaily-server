@@ -10,9 +10,6 @@ const Authorize = (rol) =>{
     try{
         const authHeader = req.headers['authorization'];
 
-    console.log('→ middleware sees headers:', req.headers);
-    // or more specifically:
-    console.log('→ middleware sees Authorization header:', req.get('Authorization'));
 
 
         if (!authHeader.startsWith('Bearer ')) {

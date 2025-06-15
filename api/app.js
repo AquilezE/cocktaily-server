@@ -32,6 +32,6 @@ app.use(cors());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/api', routes);  
 
-models.sequelize.authenticate().then(() => console.log('BD conectada')).catch(err => console.error('pedos con bd: ', err))
+models.sequelize.authenticate().then(() => console.log('BD conectada')).catch(err => console.error('.'));
 
 module.exports = app;
