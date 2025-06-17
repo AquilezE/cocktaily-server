@@ -4,7 +4,7 @@
     "password": "streaming_pass",
     "database": "streaming",
 
-    "host": "192.168.1.15",
+    "host": "33.43.1.15",
     "dialect": "mysql"
   },
   "test": {
@@ -12,7 +12,7 @@
     "password": "streaming_pass",
     "database": "streaming",
 
-    "host": "192.168.1.15",
+    "host": "33.43.1.15",
     "dialect": "mysql"
   },
   "production": {
@@ -20,7 +20,7 @@
     "password": "streaming_pass",
     "database": "streaming",
 
-    "host": "192.168.1.15",
+    "host": "33.43.1.15",
     "dialect": "mysql"
   }
 }
