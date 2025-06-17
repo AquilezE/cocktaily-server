@@ -1,5 +1,5 @@
 ---
-- name: Provisionar VM de la API Cocktaily
+- name: Provisionar VM de la API y gRPC Cocktaily
   hosts: all
   become: true
 
@@ -10,9 +10,23 @@
         state: present
         update_cache: yes
 
-    - name: Asegurar carpeta de uploads persistente
+    - name: Asegurar Docker corriendo
+      service:
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: Crear carpeta de uploads para la API
       file:
         path: /home/vagrant/api/uploads
+        state: directory
+        owner: vagrant
+        group: vagrant
+        mode: '0755'
+
+    - name: Crear carpeta de uploads para el video service
+      file:
+        path: /home/vagrant/video/uploads
         state: directory
         owner: vagrant
         group: vagrant
@@ -21,6 +35,12 @@
     - name: Pull image Cocktaily-API
       community.docker.docker_image:
         name: aquileze/cocktaily-api
+        tag: latest
+        source: pull
+
+    - name: Pull image Cocktaily-Video-Service
+      community.docker.docker_image:
+        name: aquileze/cocktaily-video-service
         tag: latest
         source: pull
 
@@ -34,3 +54,14 @@
           - "3000:3000"
         volumes:
           - /home/vagrant/api/uploads:/app/uploads
+
+    - name: Ejecutar contenedor Cocktaily-Video-Service
+      community.docker.docker_container:
+        name: cocktaily-video-service
+        image: aquileze/cocktaily-video-service:latest
+        state: started
+        restart_policy: unless-stopped
+        published_ports:
+          - "50051:50051"
+        volumes:
+          - /home/vagrant/video/uploads:/app/resources/uploads

@@ -8,7 +8,7 @@ Vagrant.configure("2") do |config|
 
   config.vm.define "nginxRMTP" do |nginxRMTP|
     nginxRMTP.vm.hostname = "static"
-    nginxRMTP.vm.network "public_network", ip: "33.43.1.13"
+    nginxRMTP.vm.network "public_network", ip: "192.168.1.13"
     nginxRMTP.vm.provision "ansible_local" do |ansible|
       ansible.playbook = "provision-nginxRMTP.yml"
     end
@@ -16,7 +16,7 @@ Vagrant.configure("2") do |config|
 
   config.vm.define "api" do |api|
     api.vm.hostname = "apiStream"
-    api.vm.network "public_network", ip: "33.43.1.14"
+    api.vm.network "public_network", ip: "192.168.1.14"
     api.vm.provision "ansible_local" do |ansible|
       ansible.playbook = "provision-api.yml"
     end
