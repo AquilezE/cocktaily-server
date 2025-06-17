@@ -1,0 +1,53 @@
+name: Build and Push API docker image
+
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Decode GCP service account key
+        run: |
+          mkdir -p api/config
+          echo "${{ secrets.SERVICE_KEY_BASE64 }}" | base64 -d > api/config/serviceAccountKey.json
+
+      - name: Generate .env for API
+        run: |
+          cat <<EOF > api/.env
+          JWT_SECRET=${{ secrets.JWT_SECRET }}
+          TRANSMISION_IP=${{ secrets.TRANSMISION_IP }}
+          SERVICE_ACCOUNT_PATH=./config/serviceAccountKey.json
+          NODE_TLS_REJECT_UNAUTHORIZED=0
+          EMAIL_USER=${{ secrets.EMAIL_USER }}
+          EMAIL_PASS=${{ secrets.EMAIL_PASS }}
+          EOF
+
+      - name: write GCP service Account Key
+        run: |
+          echo "${{ secrets.SERVICE_KEY_BASE64 }}" | base64 -d > api/config/serviceAccountKey.json
+
+      - name: Log in to DockerHub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build & push Docker image
+        uses: docker/build-push-action@v3
+        with:
+          context: ./api
+          file: ./api/Dockerfile
+          push: true
+          tags: aquileze/cocktaily-api:latest

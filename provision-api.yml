@@ -1,58 +1,36 @@
-- name: Provision API / Chat in development mode
+---
+- name: Provisionar VM de la API Cocktaily
   hosts: all
   become: true
-  vars:
-    node_version: "18.x"   
+
   tasks:
-    - name: Add NodeSource apt key
-      ansible.builtin.apt_key:
-        url: https://deb.nodesource.com/gpgkey/nodesource.gpg.key
-        state: present
-
-    - name: Add NodeSource repo
-      ansible.builtin.apt_repository:
-        repo: "deb https://deb.nodesource.com/node_{{ node_version }} jammy main"
-        state: present
-
-    - name: Install Node.js & build tools
-      ansible.builtin.apt:
-        name:
-          - nodejs
-          - build-essential
+    - name: Instalar Docker
+      apt:
+        name: docker.io
         state: present
         update_cache: yes
 
-    - name: Ensure /home/vagrant/api exists
+    - name: Asegurar carpeta de uploads persistente
       file:
-        path: /home/vagrant/api
+        path: /home/vagrant/api/uploads
         state: directory
         owner: vagrant
+        group: vagrant
+        mode: '0755'
 
-    - name: Install npm dependencies
-      ansible.builtin.command:
-        cmd: npm install
-        chdir: /home/vagrant/api
-      become_user: vagrant
+    - name: Pull image Cocktaily-API
+      community.docker.docker_image:
+        name: aquileze/cocktaily-api
+        tag: latest
+        source: pull
 
-    - name: Install nodemon globally for auto‐reload
-      ansible.builtin.npm:
-        name: nodemon
-        global: yes
-
-    - name: Copy api-dev systemd unit
-      ansible.builtin.template:
-        src: templates/api-dev.service.j2
-        dest: /etc/systemd/system/api-dev.service
-        owner: root
-        group: root
-        mode: 0644
-
-    - name: Reload systemd daemons
-      ansible.builtin.systemd:
-        daemon_reload: true
-
-    - name: Enable & start api-dev service
-      ansible.builtin.systemd:
-        name: api-dev
-        enabled: yes
+    - name: Ejecutar contenedor Cocktaily-API
+      community.docker.docker_container:
+        name: cocktaily-api
+        image: aquileze/cocktaily-api:latest
         state: started
+        restart_policy: unless-stopped
+        published_ports:
+          - "3000:3000"
+        volumes:
+          - /home/vagrant/api/uploads:/app/uploads
