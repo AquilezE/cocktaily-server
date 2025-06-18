@@ -55,4 +55,4 @@ jobs:
           file: ./api/Dockerfile
           push: true
           tags: aquileze/cocktaily-api:latest
-          nocache: true
+          no-cache: true
