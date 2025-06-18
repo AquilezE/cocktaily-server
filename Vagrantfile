@@ -6,6 +6,15 @@ Vagrant.configure("2") do |config|
 
   config.vm.box = "ubuntu/jammy64"  
 
+
+  config.vm.define "mysql" do |mysql|
+    mysql.vm.hostname = "mysqlStream"
+    mysql.vm.network "public_network", ip: "33.43.1.15"
+    mysql.vm.provision "ansible_local" do |ansible|
+      ansible.playbook = "provision-mysql.yml"
+    end
+  end
+
   config.vm.define "nginxRMTP" do |nginxRMTP|
     nginxRMTP.vm.hostname = "static"
     nginxRMTP.vm.network "public_network", ip: "33.43.1.13"
@@ -22,12 +31,6 @@ Vagrant.configure("2") do |config|
     end
   end
 
-  config.vm.define "mysql" do |mysql|
-    mysql.vm.hostname = "mysqlStream"
-    mysql.vm.network "public_network", ip: "33.43.1.15"
-    mysql.vm.provision "ansible_local" do |ansible|
-      ansible.playbook = "provision-mysql.yml"
-    end
-  end
+
   
 end
