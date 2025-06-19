@@ -12,7 +12,6 @@ const PORT = process.env.PORT || 3000;
   try {
     await sequelize.authenticate();
     console.log('✅ DB connected');
-    await sequelize.sync();
     console.log('✅ Tables synced');
 
     const server = http.createServer(app);
